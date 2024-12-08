@@ -8,48 +8,49 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            padding: 50px;
+            margin-top: 50px;
         }
-        .data-container {
-            font-size: 24px;
-            margin: 20px 0;
+        #data-container {
+            margin: 20px;
         }
-        .data-container span {
-            font-weight: bold;
+        .record {
+            margin: 5px 0;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-
-    <h1>Real-Time Temperature and Humidity Data</h1>
-
-    <div class="data-container">
-        <p>Temperature: <span id="temperature">--</span> °C</p>
-        <p>Humidity: <span id="humidity">--</span> %</p>
+    <h1>Temperature and Humidity Records</h1>
+    <div id="data-container">
+        <!-- The temperature and humidity records will be displayed here -->
     </div>
 
     <script>
-        // Function to fetch and update temperature and humidity data
-        function updateData() {
-            // Fetch the current URL with query parameters
+        function getQueryParameter(name) {
             const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
 
-            // Get the Temp and hum values from the URL
-            const temperature = urlParams.get('Temp');
-            const humidity = urlParams.get('hum');
+        function updateData() {
+            // Get the temperature and humidity from the URL
+            const temperature = getQueryParameter('Temp');
+            const humidity = getQueryParameter('hum');
 
-            // Update the displayed data
-            if (temperature !== null) {
-                document.getElementById('temperature').textContent = temperature;
-            }
-            if (humidity !== null) {
-                document.getElementById('humidity').textContent = humidity;
+            if (temperature && humidity) {
+                const recordContainer = document.getElementById('data-container');
+
+                // Create a new record element
+                const recordElement = document.createElement('div');
+                recordElement.classList.add('record');
+                recordElement.innerHTML = `Temp: ${temperature}°C | Humidity: ${humidity}%`;
+
+                // Insert the new record at the top of the data container (new to old)
+                recordContainer.insertBefore(recordElement, recordContainer.firstChild);
             }
         }
 
-        // Update the data every 1 second (1000 milliseconds)
+        // Update data every 1 second
         setInterval(updateData, 1000);
     </script>
-
 </body>
 </html>
