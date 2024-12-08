@@ -1,106 +1,151 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temperature & Humidity Data</title>
+    <title>Temperature and Humidity Data</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
         table, th, td {
             border: 1px solid black;
         }
         th, td {
-            padding: 8px;
+            padding: 10px;
             text-align: center;
         }
         button {
-            padding: 10px;
             margin: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Temperature & Humidity Data Records</h1>
-    
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>Time</th>
-                <th>Temperature (°C)</th>
-                <th>Humidity (%)</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data rows will be added here -->
-        </tbody>
-    </table>
+
+<h1>Temperature & Humidity Data</h1>
+
+<!-- Input fields for Temperature and Humidity -->
+<div>
+    <label for="temperature">Temperature (°C):</label>
+    <input type="number" id="temperature" required><br><br>
+
+    <label for="humidity">Humidity (%):</label>
+    <input type="number" id="humidity" required><br><br>
 
     <button onclick="addData()">Add Data</button>
-    <button onclick="resetData()">Reset Data</button>
-    <button onclick="downloadData()">Download Excel</button>
+    <button onclick="resetForm()">Reset</button>
+</div>
 
-    <h3>Send Data Link</h3>
-    <a href="#" id="gsmLink" target="_blank">Send Data via GSM</a>
+<!-- Table to show data records -->
+<h2>Data Records</h2>
+<table id="dataTable">
+    <thead>
+        <tr>
+            <th>Temperature (°C)</th>
+            <th>Humidity (%)</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Data rows will be inserted here -->
+    </tbody>
+</table>
 
-    <script>
-        // Sample data
-        const data = [
-            { time: '2024-12-08 10:00', temperature: 24.5, humidity: 60 },
-            { time: '2024-12-08 10:30', temperature: 25.0, humidity: 58 },
-        ];
+<!-- Button to download data as Excel file -->
+<button onclick="downloadData()">Download Data as Excel</button>
 
-        // Function to add a row to the table
-        function addData() {
-            const now = new Date();
-            const time = now.toISOString().slice(0, 19).replace("T", " ");
-            const temperature = (Math.random() * (30 - 20) + 20).toFixed(2);  // Random temperature between 20 and 30
-            const humidity = (Math.random() * (80 - 40) + 40).toFixed(2);      // Random humidity between 40 and 80
+<!-- Send Data via URL -->
+<h3>Send Data</h3>
+<button onclick="sendData()">Send Data via URL</button>
 
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            const newRow = table.insertRow();
-            newRow.insertCell(0).textContent = time;
-            newRow.insertCell(1).textContent = temperature;
-            newRow.insertCell(2).textContent = humidity;
+<script>
+// Function to add data to the table
+function addData() {
+    const temperature = document.getElementById('temperature').value;
+    const humidity = document.getElementById('humidity').value;
 
-            // Update GSM Link
-            const gsmLink = document.getElementById('gsmLink');
-            gsmLink.href = `http://example.com/sendData?time=${time}&temperature=${temperature}&humidity=${humidity}`;
+    if (temperature === "" || humidity === "") {
+        alert("Please fill in both fields.");
+        return;
+    }
+
+    const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+    const newRow = table.insertRow();
+
+    newRow.innerHTML = `
+        <td>${temperature}</td>
+        <td>${humidity}</td>
+        <td><button onclick="deleteRow(this)">Delete</button></td>
+    `;
+
+    document.getElementById('temperature').value = '';
+    document.getElementById('humidity').value = '';
+}
+
+// Function to reset the form
+function resetForm() {
+    document.getElementById('temperature').value = '';
+    document.getElementById('humidity').value = '';
+}
+
+// Function to delete a row
+function deleteRow(button) {
+    const row = button.parentElement.parentElement;
+    row.remove();
+}
+
+// Function to download data as Excel file
+function downloadData() {
+    const table = document.getElementById('dataTable');
+    const rows = table.querySelectorAll('tr');
+    let csvContent = 'Temperature (°C),Humidity (%)\n';
+
+    rows.forEach((row, index) => {
+        if (index > 0) {
+            const cells = row.querySelectorAll('td');
+            const temperature = cells[0].innerText;
+            const humidity = cells[1].innerText;
+            csvContent += `${temperature},${humidity}\n`;
         }
+    });
 
-        // Function to reset the data table
-        function resetData() {
-            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-            table.innerHTML = ''; // Clear all rows
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'temperature_humidity_data.csv';
+    link.click();
+}
+
+// Function to send data via URL
+function sendData() {
+    const table = document.getElementById('dataTable');
+    const rows = table.querySelectorAll('tr');
+    let url = 'http://example.com/send-data?';
+
+    rows.forEach((row, index) => {
+        if (index > 0) {
+            const cells = row.querySelectorAll('td');
+            const temperature = cells[0].innerText;
+            const humidity = cells[1].innerText;
+            url += `temperature[]=${temperature}&humidity[]=${humidity}&`;
         }
+    });
 
-        // Function to download the data as an Excel file
-        function downloadData() {
-            let tableData = [["Time", "Temperature (°C)", "Humidity (%)"]];
-            const rows = document.getElementById('dataTable').getElementsByTagName('tbody')[0].rows;
+    // Remove the last '&' symbol
+    url = url.slice(0, -1);
 
-            for (let i = 0; i < rows.length; i++) {
-                const row = rows[i];
-                const rowData = [
-                    row.cells[0].textContent,
-                    row.cells[1].textContent,
-                    row.cells[2].textContent
-                ];
-                tableData.push(rowData);
-            }
+    console.log('Sending data to URL:', url);
+    window.open(url, '_blank'); // Open the URL to send the data
+}
+</script>
 
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.aoa_to_sheet(tableData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
-
-            // Download the Excel file
-            XLSX.writeFile(workbook, "temperature_humidity_data.xlsx");
-        }
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
 </body>
 </html>
