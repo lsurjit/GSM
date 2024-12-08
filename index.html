@@ -7,145 +7,48 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .data-container {
+            font-size: 24px;
             margin: 20px;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 10px;
-            text-align: center;
-        }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            cursor: pointer;
+        .data {
+            font-weight: bold;
+            color: #333;
         }
     </style>
 </head>
 <body>
 
-<h1>Temperature & Humidity Data</h1>
+    <h1>Temperature and Humidity Data</h1>
+    <div class="data-container">
+        <p>Temperature: <span id="temperature" class="data">Loading...</span> °C</p>
+        <p>Humidity: <span id="humidity" class="data">Loading...</span> %</p>
+    </div>
 
-<!-- Input fields for Temperature and Humidity -->
-<div>
-    <label for="temperature">Temperature (°C):</label>
-    <input type="number" id="temperature" required><br><br>
-
-    <label for="humidity">Humidity (%):</label>
-    <input type="number" id="humidity" required><br><br>
-
-    <button onclick="addData()">Add Data</button>
-    <button onclick="resetForm()">Reset</button>
-</div>
-
-<!-- Table to show data records -->
-<h2>Data Records</h2>
-<table id="dataTable">
-    <thead>
-        <tr>
-            <th>Temperature (°C)</th>
-            <th>Humidity (%)</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        <!-- Data rows will be inserted here -->
-    </tbody>
-</table>
-
-<!-- Button to download data as Excel file -->
-<button onclick="downloadData()">Download Data as Excel</button>
-
-<!-- Send Data via URL -->
-<h3>Send Data</h3>
-<button onclick="sendData()">Send Data via URL</button>
-
-<script>
-// Function to add data to the table
-function addData() {
-    const temperature = document.getElementById('temperature').value;
-    const humidity = document.getElementById('humidity').value;
-
-    if (temperature === "" || humidity === "") {
-        alert("Please fill in both fields.");
-        return;
-    }
-
-    const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
-    const newRow = table.insertRow();
-
-    newRow.innerHTML = `
-        <td>${temperature}</td>
-        <td>${humidity}</td>
-        <td><button onclick="deleteRow(this)">Delete</button></td>
-    `;
-
-    document.getElementById('temperature').value = '';
-    document.getElementById('humidity').value = '';
-}
-
-// Function to reset the form
-function resetForm() {
-    document.getElementById('temperature').value = '';
-    document.getElementById('humidity').value = '';
-}
-
-// Function to delete a row
-function deleteRow(button) {
-    const row = button.parentElement.parentElement;
-    row.remove();
-}
-
-// Function to download data as Excel file
-function downloadData() {
-    const table = document.getElementById('dataTable');
-    const rows = table.querySelectorAll('tr');
-    let csvContent = 'Temperature (°C),Humidity (%)\n';
-
-    rows.forEach((row, index) => {
-        if (index > 0) {
-            const cells = row.querySelectorAll('td');
-            const temperature = cells[0].innerText;
-            const humidity = cells[1].innerText;
-            csvContent += `${temperature},${humidity}\n`;
+    <script>
+        // Function to get query parameters from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
         }
-    });
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'temperature_humidity_data.csv';
-    link.click();
-}
+        // Get temperature and humidity from URL parameters
+        const temperature = getQueryParam('temperature');
+        const humidity = getQueryParam('humidity');
 
-// Function to send data via URL
-function sendData() {
-    const table = document.getElementById('dataTable');
-    const rows = table.querySelectorAll('tr');
-    let url = 'https://lsurjit.github.io/GSM/?';
-
-    rows.forEach((row, index) => {
-        if (index > 0) {
-            const cells = row.querySelectorAll('td');
-            const temperature = cells[0].innerText;
-            const humidity = cells[1].innerText;
-            url += `temperature[]=${temperature}&humidity[]=${humidity}&`;
+        // If data is available, update the HTML content
+        if (temperature && humidity) {
+            document.getElementById('temperature').textContent = temperature;
+            document.getElementById('humidity').textContent = humidity;
+        } else {
+            // If no data, show an error message
+            document.getElementById('temperature').textContent = 'Data not available';
+            document.getElementById('humidity').textContent = 'Data not available';
         }
-    });
-
-    // Remove the last '&' symbol
-    url = url.slice(0, -1);
-
-    console.log('Sending data to URL:', url);
-    window.open(url, 'https://lsurjit.github.io/GSM/'); // Open the URL to send the data
-}
-</script>
+    </script>
 
 </body>
 </html>
