@@ -8,46 +8,47 @@
         body {
             font-family: Arial, sans-serif;
             text-align: center;
-            margin-top: 50px;
+            padding: 50px;
         }
         .data-container {
             font-size: 24px;
-            margin: 20px;
+            margin: 20px 0;
         }
-        .data {
+        .data-container span {
             font-weight: bold;
-            color: #333;
         }
     </style>
 </head>
 <body>
 
-    <h1>Temperature and Humidity Data</h1>
+    <h1>Real-Time Temperature and Humidity Data</h1>
+
     <div class="data-container">
-        <p>Temperature: <span id="temperature" class="data">Loading...</span> °C</p>
-        <p>Humidity: <span id="humidity" class="data">Loading...</span> %</p>
+        <p>Temperature: <span id="temperature">--</span> °C</p>
+        <p>Humidity: <span id="humidity">--</span> %</p>
     </div>
 
     <script>
-        // Function to get query parameters from the URL
-        function getQueryParam(param) {
+        // Function to fetch and update temperature and humidity data
+        function updateData() {
+            // Fetch the current URL with query parameters
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(param);
+
+            // Get the Temp and hum values from the URL
+            const temperature = urlParams.get('Temp');
+            const humidity = urlParams.get('hum');
+
+            // Update the displayed data
+            if (temperature !== null) {
+                document.getElementById('temperature').textContent = temperature;
+            }
+            if (humidity !== null) {
+                document.getElementById('humidity').textContent = humidity;
+            }
         }
 
-        // Get temperature and humidity from URL parameters
-        const temperature = getQueryParam('temperature');
-        const humidity = getQueryParam('humidity');
-
-        // If data is available, update the HTML content
-        if (temperature && humidity) {
-            document.getElementById('temperature').textContent = temperature;
-            document.getElementById('humidity').textContent = humidity;
-        } else {
-            // If no data, show an error message
-            document.getElementById('temperature').textContent = 'Data not available';
-            document.getElementById('humidity').textContent = 'Data not available';
-        }
+        // Update the data every 1 second (1000 milliseconds)
+        setInterval(updateData, 1000);
     </script>
 
 </body>
