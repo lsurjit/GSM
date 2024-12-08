@@ -7,50 +7,101 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0;
+            padding: 20px;
         }
-        #data-container {
-            margin: 20px;
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
         }
         .record {
+            background: #e2e2e2;
             margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        h2 {
+            text-align: center;
+        }
+        .data {
+            display: flex;
+            justify-content: space-between;
             font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <h1>Temperature and Humidity Records</h1>
-    <div id="data-container">
-        <!-- The temperature and humidity records will be displayed here -->
+
+    <div class="container">
+        <h2>Temperature and Humidity Data</h2>
+        <div id="records">
+            <!-- Records will be displayed here -->
+        </div>
     </div>
 
     <script>
-        function getQueryParameter(name) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(name);
+        let records = []; // Array to store the records
+
+        function fetchData() {
+            // Fetch the data from the provided URL
+            fetch('https://lsurjit.github.io/GSM?Temp=15&hum=56')
+                .then(response => response.text())
+                .then(data => {
+                    // Parse the data and extract temperature and humidity
+                    const urlParams = new URLSearchParams(data);
+                    const temp = urlParams.get('Temp');
+                    const hum = urlParams.get('hum');
+
+                    // Add the new data record to the records array
+                    const newRecord = { temp: temp, hum: hum, timestamp: new Date() };
+                    records.unshift(newRecord); // Add new record at the beginning
+
+                    // Limit records to the most recent 10 entries
+                    if (records.length > 10) {
+                        records.pop(); // Remove the last record if there are more than 10
+                    }
+
+                    // Update the displayed records on the page
+                    displayRecords();
+                })
+                .catch(error => console.error('Error fetching data:', error));
         }
 
-        function updateData() {
-            // Get the temperature and humidity from the URL
-            const temperature = getQueryParameter('Temp');
-            const humidity = getQueryParameter('hum');
+        function displayRecords() {
+            // Get the container where records will be displayed
+            const recordsContainer = document.getElementById('records');
+            recordsContainer.innerHTML = ''; // Clear the existing records
 
-            if (temperature && humidity) {
-                const recordContainer = document.getElementById('data-container');
+            // Loop through each record and display it
+            records.forEach(record => {
+                const recordDiv = document.createElement('div');
+                recordDiv.classList.add('record');
 
-                // Create a new record element
-                const recordElement = document.createElement('div');
-                recordElement.classList.add('record');
-                recordElement.innerHTML = `Temp: ${temperature}°C | Humidity: ${humidity}%`;
+                // Create the content for the record
+                const recordContent = `
+                    <div class="data">
+                        <span>Temperature: ${record.temp}°C</span>
+                        <span>Humidity: ${record.hum}%</span>
+                    </div>
+                    <div class="data">
+                        <span>Timestamp: ${record.timestamp.toLocaleTimeString()}</span>
+                    </div>
+                `;
+                recordDiv.innerHTML = recordContent;
 
-                // Insert the new record at the top of the data container (new to old)
-                recordContainer.insertBefore(recordElement, recordContainer.firstChild);
-            }
+                // Append the record to the container
+                recordsContainer.appendChild(recordDiv);
+            });
         }
 
-        // Update data every 1 second
-        setInterval(updateData, 1000);
+        // Fetch data every 1 second
+        setInterval(fetchData, 1000);
     </script>
+
 </body>
 </html>
