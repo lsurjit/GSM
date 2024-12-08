@@ -56,8 +56,8 @@
         function addData() {
             const now = new Date();
             const time = now.toISOString().slice(0, 19).replace("T", " ");
-            const temperature = (Math.random() * (30 - 20) + 20).toFixed(2);  // Random temperature between 20 and 30
-            const humidity = (Math.random() * (80 - 40) + 40).toFixed(2);      // Random humidity between 40 and 80
+            const temperature = (Math.random();  // Random temperature between 20 and 30
+            const humidity = (Math.random();      // Random humidity between 40 and 80
 
             const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
             const newRow = table.insertRow();
@@ -67,7 +67,7 @@
 
             // Update GSM Link
             const gsmLink = document.getElementById('gsmLink');
-            gsmLink.href = `https://lsurjit.github.io/GSM/sendData?time=${time}&temperature=${temperature}&humidity=${humidity}`;
+            gsmLink.href = `https://lsurjit.github.io/GSM?time=${time}&temperature=${temperature}&humidity=${humidity}`;
         }
 
         // Function to reset the data table
